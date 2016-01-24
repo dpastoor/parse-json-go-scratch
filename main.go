@@ -26,8 +26,14 @@ func main() {
 	defer gz.Close()
 
 	scanner := bufio.NewScanner(gz)
+	i := 0
 	for scanner.Scan() {
 		fmt.Println(scanner.Text())
+		fmt.Println("")
+		i++
+		if i > 2 {
+			break
+		}
 	}
 
 }
