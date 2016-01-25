@@ -6,11 +6,12 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"testing"
 
 	"github.com/jeffail/gabs"
 )
 
-func main() {
+func TestFunc(t *testing.T) {
 
 	filename := "2015-01-01-2.json.gz"
 	file, err := os.Open(filename)
@@ -30,7 +31,6 @@ func main() {
 
 	scanner := bufio.NewScanner(gz)
 	var value string
-	var ok bool
 	var types []string
 	for scanner.Scan() {
 		jsonParsed, err := gabs.ParseJSON([]byte(scanner.Text()))
@@ -38,12 +38,12 @@ func main() {
 			fmt.Println("ERROR")
 		}
 
-		value, ok = jsonParsed.Path("type").Data().(string)
+		value, _ = jsonParsed.Path("type").Data().(string)
 		types = append(types, value)
-		fmt.Println(jsonParsed)
-		fmt.Println("")
-		fmt.Println(value)
-		fmt.Println(ok)
+		// fmt.Println(jsonParsed)
+		// fmt.Println("")
+		// fmt.Println(value)
+		// fmt.Println(ok)
 	}
 	fmt.Println(len(types))
 
