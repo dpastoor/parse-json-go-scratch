@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
 	"testing"
 )
@@ -51,16 +52,24 @@ func ReadLine(filename string) {
 	r := bufio.NewReaderSize(f, 100*1024)
 	numLines := 0
 	i := 0
-	_, isPrefix, err := r.ReadLine()
+	var overflow []byte
+	line, isPrefix, err := r.ReadLine()
 	for err == nil {
 		if !isPrefix {
+			if len(overflow) > 0 {
+				line = append(overflow, line...)
+				overflow = nil
+				fmt.Println("number of buffer overflows: ", string(line))
+				ioutil.WriteFile("temp.json", line, 0644)
+			}
 			fmt.Println("clean line")
 			numLines++
 		} else {
 			fmt.Println("buffer size to small")
+			overflow = append(overflow, line...)
 			i++
 		}
-		_, isPrefix, err = r.ReadLine()
+		line, isPrefix, err = r.ReadLine()
 	}
 	if err != io.EOF {
 		fmt.Println(err)
