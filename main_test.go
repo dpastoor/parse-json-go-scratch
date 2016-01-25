@@ -2,49 +2,70 @@ package main
 
 import (
 	"bufio"
-	"compress/gzip"
 	"fmt"
-	"log"
+	"io"
 	"os"
 	"testing"
-
-	"github.com/jeffail/gabs"
 )
 
 func TestFunc(t *testing.T) {
 
-	filename := "2015-01-01-2.json.gz"
-	file, err := os.Open(filename)
-
+	filename := "2015-01-01-2.json"
+	// file, err := os.Open(filename)
+	// //
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	//
+	// defer file.Close()
+	// i := 0
+	// scanner := bufio.NewScanner(file)
+	// for scanner.Scan() {
+	// 	line := scanner.Text()
+	// 	if len(line) > 1 {
+	//
+	// 	}
+	// 	i++
+	// 	// jsonParsed, err := gabs.ParseJSON([]byte(scanner.Text()))
+	// 	// if err != nil {
+	// 	// 	fmt.Println("ERROR")
+	// 	// }
+	// 	// i++
+	// 	//
+	// 	// value, ok = jsonParsed.Path("type").Data().(string)
+	// 	// if ok {
+	// 	// 	types = append(types, value)
+	// 	// }
+	// }
+	// fmt.Println(i)
+	// // fmt.Println(len(types))
+	ReadLine(filename)
+}
+func ReadLine(filename string) {
+	f, err := os.Open(filename)
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println(err)
+		return
 	}
-
-	gz, err := gzip.NewReader(file)
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	defer file.Close()
-	defer gz.Close()
-
-	scanner := bufio.NewScanner(gz)
-	var value string
-	var types []string
-	for scanner.Scan() {
-		jsonParsed, err := gabs.ParseJSON([]byte(scanner.Text()))
-		if err != nil {
-			fmt.Println("ERROR")
+	defer f.Close()
+	r := bufio.NewReaderSize(f, 100*1024)
+	numLines := 0
+	i := 0
+	_, isPrefix, err := r.ReadLine()
+	for err == nil {
+		if !isPrefix {
+			fmt.Println("clean line")
+			numLines++
+		} else {
+			fmt.Println("buffer size to small")
+			i++
 		}
-
-		value, _ = jsonParsed.Path("type").Data().(string)
-		types = append(types, value)
-		// fmt.Println(jsonParsed)
-		// fmt.Println("")
-		// fmt.Println(value)
-		// fmt.Println(ok)
+		_, isPrefix, err = r.ReadLine()
 	}
-	fmt.Println(len(types))
+	if err != io.EOF {
+		fmt.Println(err)
+	}
+	fmt.Println("number of buffer overflows: ", i)
+	fmt.Println("number of lines: ", numLines)
 
 }
